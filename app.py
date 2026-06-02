@@ -175,7 +175,7 @@ class ABTestApp(ctk.CTk):
 
         ctk.CTkLabel(
             header,
-            text="Experiments",
+            text="실험 목록",
             font=t.f_title(),
             text_color=t.TEXT_PRIMARY,
             anchor="w",
@@ -183,7 +183,7 @@ class ABTestApp(ctk.CTk):
 
         ctk.CTkLabel(
             header,
-            text="실행 중인 A/B 테스트를 관리하고 결과를 분석합니다",
+            text="실험을 만들고 시뮬레이션 결과를 확인합니다",
             font=t.f_caption(),
             text_color=t.TEXT_SECONDARY,
             anchor="w",
@@ -241,7 +241,7 @@ class ABTestApp(ctk.CTk):
         ).pack()
         ctk.CTkLabel(
             inner,
-            text="새 실험을 만들거나 AI로 설계해보세요",
+            text="새 실험을 만들거나 AI로 설계안을 작성하세요",
             font=t.f_caption(),
             text_color=t.TEXT_SECONDARY,
         ).pack(pady=(t.SPACE_1, t.SPACE_4))
@@ -639,7 +639,7 @@ class ABTestApp(ctk.CTk):
         hypothesis_box = self._styled_textbox(
             frame,
             "가설 (필수)",
-            "원본 A를 대안 B로 바꾸면 지표 X가 Y하게 변할 것이다",
+            "예: 결제 버튼 색상을 바꾸면 결제 전환율이 높아질 것이다",
         )
         ratio_entry = self._styled_field(frame, "A 그룹 비율 (0~1)", "0.5")
         baseline_entry = self._styled_field(frame, "기준 전환율", "0.10")
@@ -665,7 +665,7 @@ class ABTestApp(ctk.CTk):
                 effect = float(effect_entry.get() or "0.05")
                 duration = int(duration_entry.get() or "14")
             except ValueError:
-                status.configure(text="숫자 필드를 확인해주세요.")
+                status.configure(text="숫자 입력값을 확인하세요.")
                 return
 
             if not 0.05 <= ratio <= 0.95:
@@ -697,7 +697,7 @@ class ABTestApp(ctk.CTk):
             messagebox.showinfo(
                 "실험 생성 완료",
                 (
-                    f"실험 #{exp_id} 생성됨\n\n"
+                    f"실험 #{exp_id}을 만들었습니다.\n\n"
                     f"권장 표본 크기: 그룹당 {required_text}\n"
                     f"실험 기간: {duration}일\n\n"
                     "p-value를 보고 조기 중단하지 마세요.\n"
@@ -794,7 +794,7 @@ class ABTestApp(ctk.CTk):
         if n < 100:
             messagebox.showwarning(
                 "표본이 너무 작습니다",
-                "최소 100명 이상을 권장합니다.\n작은 표본은 통계 분석이 무의미할 수 있습니다.",
+                "최소 100명 이상을 권장합니다.\n표본이 작으면 분석 결과의 변동이 클 수 있습니다.",
             )
             return
         if n > 1_000_000:
@@ -848,7 +848,7 @@ class ABTestApp(ctk.CTk):
         messagebox.showinfo(
             "완료",
             (
-                f"{result['exposures']:,}명 노출 이벤트 생성됨.\n"
+                f"{result['exposures']:,}명의 노출 이벤트를 만들었습니다.\n"
                 f"A 전환: {result['conversions_a']:,}명\n"
                 f"B 전환: {result['conversions_b']:,}명"
             ),
@@ -1159,7 +1159,7 @@ class ABTestApp(ctk.CTk):
         ).pack(anchor="w", padx=t.SPACE_5, pady=(t.SPACE_4, 0))
         ctk.CTkLabel(
             chart_card_2,
-            text="노출이 쌓일수록 우연한 변동이 줄고 진짜 효과에 수렴합니다",
+            text="노출 수가 늘어날 때 두 그룹의 누적 전환율이 어떻게 변하는지 확인합니다",
             font=t.f_tiny(),
             text_color=t.TEXT_TERTIARY,
             anchor="w",
@@ -1412,21 +1412,21 @@ class ABTestApp(ctk.CTk):
 
         if result["significant"] and diff > 0:
             text = (
-                f"B 그룹이 A 그룹 대비 {lift:+.1%} 더 높은 전환율을 보였고, "
-                f"이 차이가 우연일 확률(p-value)은 {p:.4f}로 매우 낮습니다. "
-                "신뢰구간이 0을 포함하지 않으므로 B의 효과는 실재한다고 판단할 수 있습니다."
+                f"B 그룹의 전환율이 A 그룹보다 {lift:+.1%} 높습니다. "
+                f"p-value는 {p:.4f}이며, 신뢰구간에 0이 포함되지 않습니다. "
+                "현재 표본에서는 B 그룹의 개선 효과가 확인됩니다."
             )
         elif result["significant"] and diff < 0:
             text = (
-                f"B 그룹이 A 그룹보다 {lift:+.1%} 낮은 전환율을 보였습니다. "
-                f"p-value가 {p:.4f}로 통계적으로 유의한 차이이며, "
-                "B 변형이 부정적 영향을 주고 있을 가능성이 큽니다."
+                f"B 그룹의 전환율이 A 그룹보다 {lift:+.1%} 낮습니다. "
+                f"p-value는 {p:.4f}이며, 통계적으로 유의한 차이입니다. "
+                "현재 표본에서는 B안이 전환율을 낮춘 것으로 보입니다."
             )
         else:
             text = (
-                f"관측된 차이({diff:+.3%})가 우연일 확률은 {p:.4f}로 "
-                "통계적 유의성 기준을 넘지 못했습니다. 표본을 더 모으거나, "
-                "효과가 없다고 결론지을 수 있습니다. 신뢰구간도 함께 확인하세요."
+                f"관측된 차이는 {diff:+.3%}, p-value는 {p:.4f}입니다. "
+                "현재 표본에서는 유의한 차이를 확인하지 못했습니다. "
+                "표본 수와 신뢰구간을 함께 확인하세요."
             )
 
         card = ctk.CTkFrame(
@@ -1475,7 +1475,7 @@ class ABTestApp(ctk.CTk):
         ).pack(anchor="w")
         ctk.CTkLabel(
             frame,
-            text="자연어 아이디어를 입력하면 가설, 지표, 표본 계획을 제안합니다.",
+            text="아이디어를 입력하면 가설, 지표, 표본 계획이 포함된 초안을 만듭니다.",
             font=t.f_caption(),
             text_color=t.TEXT_SECONDARY,
         ).pack(anchor="w", pady=(2, t.SPACE_5))
@@ -1567,7 +1567,7 @@ class ABTestApp(ctk.CTk):
                 status.configure(text="아이디어를 입력하세요.", text_color=t.DANGER)
                 return
 
-            status.configure(text="AI가 실험 설계를 작성하는 중입니다...", text_color=t.TEXT_SECONDARY)
+            status.configure(text="설계안을 만드는 중입니다...", text_color=t.TEXT_SECONDARY)
             win.update()
 
             try:
@@ -1578,13 +1578,13 @@ class ABTestApp(ctk.CTk):
                 return
 
             result_holder["design"] = design
-            status.configure(text="설계안이 생성되었습니다.", text_color=t.SUCCESS)
+            status.configure(text="설계안을 만들었습니다.", text_color=t.SUCCESS)
             render_design(design)
 
         def create_from_design():
             design = result_holder["design"]
             if not design:
-                status.configure(text="먼저 설계안을 생성하세요.", text_color=t.DANGER)
+                status.configure(text="먼저 설계안을 만드세요.", text_color=t.DANGER)
                 return
 
             exp_id = storage.create_experiment(
@@ -1598,7 +1598,7 @@ class ABTestApp(ctk.CTk):
             )
             win.destroy()
             self.refresh_experiments()
-            messagebox.showinfo("실험 생성 완료", f"AI 설계안으로 실험 #{exp_id} 생성됨")
+            messagebox.showinfo("실험 생성 완료", f"설계안으로 실험 #{exp_id}을 만들었습니다.")
 
         ctk.CTkButton(
             button_row,
@@ -1613,7 +1613,7 @@ class ABTestApp(ctk.CTk):
 
         ctk.CTkButton(
             button_row,
-            text="AI 설계 생성",
+            text="설계안 만들기",
             command=generate,
             fg_color=t.PRIMARY,
             hover_color=t.PRIMARY_HOVER,
@@ -1623,7 +1623,7 @@ class ABTestApp(ctk.CTk):
 
         ctk.CTkButton(
             button_row,
-            text="이 설계로 실험 생성",
+            text="이 설계로 실험 만들기",
             command=create_from_design,
             fg_color=t.SUCCESS,
             hover_color=t.SUCCESS_BG,
@@ -1651,7 +1651,7 @@ class ABTestApp(ctk.CTk):
         ).pack(anchor="w")
         ctk.CTkLabel(
             frame,
-            text="Gemini API 키는 data/config.json에만 저장됩니다.",
+            text="키는 data/config.json에 저장되며, AI 요청 시 Google Gemini로 전송됩니다.",
             font=t.f_caption(),
             text_color=t.TEXT_SECONDARY,
         ).pack(anchor="w", pady=(2, t.SPACE_5))
@@ -1739,23 +1739,22 @@ class ABTestApp(ctk.CTk):
             ).pack(anchor="w", pady=(0, t.SPACE_1))
             ctk.CTkLabel(
                 body,
-                text="A/B 테스트의 전 과정을 직접 구현한 학습/시연용 도구",
+                text="가상 트래픽으로 A/B 테스트 흐름을 확인하는 데스크톱 도구",
                 font=t.f_body(),
                 text_color=t.TEXT_SECONDARY,
             ).pack(anchor="w", pady=(0, t.SPACE_5))
 
             self._welcome_card(
                 body,
-                "🎯 이 도구는 무엇인가요?",
+                "이 도구에서 할 수 있는 일",
                 (
-                    "A/B 테스트는 두 가지 안 중 어느 쪽이 더 나은지 통계적으로 검증하는 방법입니다.\n\n"
-                    "이 도구는 실제 사용자 트래픽 없이도 가상 사용자를 시뮬레이션하여 "
-                    "A/B 테스트의 전체 흐름과 결과 분석을 체험할 수 있게 해줍니다."
+                    "실험을 만들고 가상 사용자를 배정한 뒤 전환 이벤트를 생성합니다.\n\n"
+                    "수집된 표본으로 전환율, p-value, 신뢰구간, SRM 결과를 확인할 수 있습니다."
                 ),
             )
             self._welcome_card(
                 body,
-                "📦 주요 기능",
+                "주요 기능",
                 (
                     "• 결정적 해싱 기반 사용자 그룹 배정\n"
                     "• 가상 트래픽 시뮬레이션\n"
@@ -1765,11 +1764,11 @@ class ABTestApp(ctk.CTk):
             )
             self._welcome_card(
                 body,
-                "👤 이런 분께 추천합니다",
+                "활용 예시",
                 (
-                    "• A/B 테스트를 처음 배우는 분\n"
-                    "• 실험 결과를 통계적으로 해석하고 싶은 분\n"
-                    "• 실제 데이터 없이 다양한 시나리오를 연습하고 싶은 분"
+                    "• A/B 테스트의 배정 로직을 확인할 때\n"
+                    "• 표본 수에 따른 결과 변화를 비교할 때\n"
+                    "• 통계 검정 결과를 읽는 연습을 할 때"
                 ),
             )
 
@@ -1789,38 +1788,39 @@ class ABTestApp(ctk.CTk):
 
             ctk.CTkLabel(
                 body,
-                text="✨ AI 어시스턴트 설정",
+                text="AI 설계 설정",
                 font=t.f_title(),
                 text_color=t.TEXT_PRIMARY,
             ).pack(anchor="w", pady=(0, t.SPACE_1))
             ctk.CTkLabel(
                 body,
-                text="선택 기능입니다. 건너뛰어도 모든 핵심 기능을 사용할 수 있어요.",
+                text="필요한 경우에만 설정하세요. 건너뛰어도 시뮬레이션과 분석을 사용할 수 있습니다.",
                 font=t.f_caption(),
                 text_color=t.TEXT_SECONDARY,
             ).pack(anchor="w", pady=(0, t.SPACE_4))
 
             self._welcome_card(
                 body,
-                "💡 왜 API 키가 필요한가요?",
+                "API 키 용도",
                 (
-                    "AI 어시스턴트는 Google Gemini를 사용해서 자연어 가설을 "
-                    "통계적으로 올바른 실험 설계로 변환합니다."
+                    "입력한 아이디어를 Google Gemini로 보내고, "
+                    "가설과 실험 조건이 담긴 초안을 받습니다."
                 ),
             )
             self._welcome_card(
                 body,
-                "💰 비용이 드나요?",
+                "발급 안내",
                 (
-                    "Google AI Studio에서 무료로 발급받을 수 있고, 개인 사용 범위에서는 "
-                    "무료 한도로 충분합니다. 신용카드 등록도 필요 없습니다."
+                    "Google AI Studio에서 API 키를 발급받을 수 있습니다. "
+                    "사용 한도와 과금 정책은 Google 안내를 확인하세요."
                 ),
             )
             self._welcome_card(
                 body,
-                "🔒 키는 안전한가요?",
+                "저장 위치",
                 (
-                    "키는 이 PC의 data/config.json 파일에만 저장되며 외부 서버로 전송되지 않습니다. "
+                    "키는 이 PC의 data/config.json 파일에 저장됩니다. "
+                    "AI 설계 요청 시 Google Gemini로 전송됩니다. "
                     "data/ 폴더는 .gitignore에 포함돼 있습니다."
                 ),
             )
@@ -1879,7 +1879,7 @@ class ABTestApp(ctk.CTk):
             ).pack(side="left", fill="x", expand=True, padx=(0, t.SPACE_2))
             ctk.CTkButton(
                 button_row,
-                text="✨ 저장하고 시작",
+                text="저장하고 시작",
                 command=save_and_close,
                 fg_color=t.PRIMARY,
                 hover_color=t.PRIMARY_HOVER,
